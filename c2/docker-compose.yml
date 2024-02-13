@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  onion:
+    container_name: onion-service
+    build:
+      context: .
+      dockerfile: ./.Dockerfile-tor
+    restart: always
+    ports:
+      - 80:80
+  c2:
+    container_name: c2
+    build:
+      context: .
+      dockerfile: ./.Dockerfile-c2
+    restart: always
+    ports:
+      - 8000:8000
