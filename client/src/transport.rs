@@ -1,15 +1,19 @@
 use anyhow::Result;
-use arti_client::{TorClient, TorClientConfig};
 use http_body_util::{BodyExt, Empty};
-use hyper::{body::Bytes, http::uri::Scheme, Request, StatusCode, Uri};
+use hyper::body::Bytes;
+use hyper::http::uri::Scheme;
+use hyper::{Request, StatusCode, Uri};
 use hyper_util::rt::TokioIo;
 use tokio::io::{AsyncRead, AsyncWrite};
 use tokio_native_tls::native_tls::TlsConnector;
 
+use arti_client::{TorClient, TorClientConfig};
+
 use crate::app::App;
 
 pub async fn make_test_connection(app: &mut App) -> Result<()> {
-    let url: Uri = "https://icanhazip.com".parse()?;
+    let url: Uri =
+        "https://duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.onion".parse()?;
     let host = url.host().unwrap();
     let https = url.scheme() == Some(&Scheme::HTTPS);
     let config = TorClientConfig::default();
@@ -23,7 +27,7 @@ pub async fn make_test_connection(app: &mut App) -> Result<()> {
     if https {
         let cx = TlsConnector::builder().build().unwrap();
         let cx = tokio_native_tls::TlsConnector::from(cx);
-        let stream = cx.connect(host, stream).await?;
+        let stream = cx.connect(host, stream).await.unwrap();
         app.set_tor_status_code(StatusCode::OK);
         make_request(host, stream, app).await
     } else {
