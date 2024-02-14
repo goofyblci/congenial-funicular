@@ -1,10 +1,11 @@
 use client::app::{App, AppResult};
 use client::event::{Event, EventHandler};
 use client::handler::handle_key_events;
+use client::transport;
 use client::tui::Tui;
-use std::io;
 use ratatui::backend::CrosstermBackend;
 use ratatui::Terminal;
+use std::io;
 
 #[tokio::main]
 async fn main() -> AppResult<()> {
@@ -17,6 +18,9 @@ async fn main() -> AppResult<()> {
     let events = EventHandler::new(250);
     let mut tui = Tui::new(terminal, events);
     tui.init()?;
+    println!("Begin");
+    let response = transport::make_test_connection(&mut app).await.unwrap();
+    println!("Response from tor: {:#?}", response);
 
     // Start the main loop.
     while app.running {
