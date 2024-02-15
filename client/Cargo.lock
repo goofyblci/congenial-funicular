@@ -158,6 +158,8 @@ dependencies = [
  "tor-dirmgr",
  "tor-error",
  "tor-guardmgr",
+ "tor-hsclient",
+ "tor-hscrypto",
  "tor-keymgr",
  "tor-linkspec",
  "tor-llcrypto",
@@ -3205,6 +3207,7 @@ dependencies = [
  "tor-bytes",
  "tor-cert",
  "tor-error",
+ "tor-hscrypto",
  "tor-linkspec",
  "tor-llcrypto",
  "tor-units",
@@ -3300,6 +3303,7 @@ dependencies = [
  "tor-config",
  "tor-error",
  "tor-guardmgr",
+ "tor-hscrypto",
  "tor-linkspec",
  "tor-netdir",
  "tor-netdoc",
@@ -3373,6 +3377,7 @@ dependencies = [
  "thiserror",
  "tor-circmgr",
  "tor-error",
+ "tor-hscrypto",
  "tor-linkspec",
  "tor-llcrypto",
  "tor-netdoc",
@@ -3486,6 +3491,48 @@ dependencies = [
  "tor-proto",
  "tor-rtcompat",
  "tor-units",
+ "tracing",
+]
+
+[[package]]
+name = "tor-hsclient"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "59272ecf50203618930066de733c46119b126ea9cab0b24101ef21f051285f96"
+dependencies = [
+ "async-trait",
+ "derive-adhoc 0.8.1",
+ "derive_more",
+ "educe",
+ "either",
+ "futures",
+ "itertools 0.12.1",
+ "postage",
+ "rand",
+ "rand_core",
+ "retry-error",
+ "safelog",
+ "slotmap",
+ "strum 0.26.1",
+ "thiserror",
+ "tor-async-utils",
+ "tor-basic-utils",
+ "tor-bytes",
+ "tor-cell",
+ "tor-checkable",
+ "tor-circmgr",
+ "tor-config",
+ "tor-dirclient",
+ "tor-error",
+ "tor-hscrypto",
+ "tor-keymgr",
+ "tor-linkspec",
+ "tor-llcrypto",
+ "tor-netdir",
+ "tor-netdoc",
+ "tor-persist",
+ "tor-proto",
+ "tor-rtcompat",
  "tracing",
 ]
 
@@ -3628,7 +3675,9 @@ dependencies = [
  "bitflags 2.4.2",
  "derive_builder_fork_arti",
  "derive_more",
+ "digest",
  "futures",
+ "hex",
  "humantime",
  "itertools 0.12.1",
  "num_enum",
@@ -3638,10 +3687,12 @@ dependencies = [
  "static_assertions",
  "strum 0.26.1",
  "thiserror",
+ "time",
  "tor-basic-utils",
  "tor-checkable",
  "tor-config",
  "tor-error",
+ "tor-hscrypto",
  "tor-linkspec",
  "tor-llcrypto",
  "tor-netdoc",
@@ -3670,6 +3721,7 @@ dependencies = [
  "itertools 0.12.1",
  "once_cell",
  "phf",
+ "rand",
  "serde",
  "serde_with",
  "signature 1.6.4",
@@ -3684,8 +3736,11 @@ dependencies = [
  "tor-cert",
  "tor-checkable",
  "tor-error",
+ "tor-hscrypto",
+ "tor-linkspec",
  "tor-llcrypto",
  "tor-protover",
+ "tor-units",
  "weak-table",
  "zeroize",
 ]
@@ -3743,6 +3798,7 @@ dependencies = [
  "tor-checkable",
  "tor-config",
  "tor-error",
+ "tor-hscrypto",
  "tor-linkspec",
  "tor-llcrypto",
  "tor-log-ratelim",
@@ -3752,6 +3808,7 @@ dependencies = [
  "tor-units",
  "tracing",
  "typenum",
+ "visibility",
  "void",
  "zeroize",
 ]
@@ -3998,6 +4055,17 @@ name = "version_check"
 version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
+
+[[package]]
+name = "visibility"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b3fd98999db9227cf28e59d83e1f120f42bc233d4b152e8fab9bc87d5bb1e0f8"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.48",
+]
 
 [[package]]
 name = "void"

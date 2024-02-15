@@ -5,6 +5,7 @@ use hyper::http::uri::Scheme;
 use hyper::{Request, StatusCode, Uri};
 use hyper_util::rt::TokioIo;
 use tokio::io::{AsyncRead, AsyncWrite};
+use tokio::time;
 use tokio_native_tls::native_tls::TlsConnector;
 
 use arti_client::{TorClient, TorClientConfig};
@@ -13,11 +14,17 @@ use crate::app::App;
 
 pub async fn make_test_connection(app: &mut App) -> Result<()> {
     let url: Uri =
-        "https://duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.onion".parse()?;
+        "http://2jwcnprqbugvyi6ok2h2h7u26qc6j5wxm7feh3znlh2qu3h6hjld4kyd.onion".parse()?;
     let host = url.host().unwrap();
     let https = url.scheme() == Some(&Scheme::HTTPS);
-    let config = TorClientConfig::default();
-    let client = TorClient::create_bootstrapped(config).await?;
+    let mut config = TorClientConfig::builder();
+    config
+        .address_filter()
+        .allow_onion_addrs(true)
+        .build()
+        .unwrap();
+    let final_config = config.build().unwrap();
+    let client = TorClient::create_bootstrapped(final_config).await?;
     let port = match url.port_u16() {
         Some(port) => port,
         _ if https => 443,
@@ -61,11 +68,16 @@ async fn make_request(
 
     app.set_tor_status_code(resp.status());
 
+    let now = time::Instant::now();
+
     while let Some(frame) = resp.body_mut().frame().await {
         let bytes = frame?.into_data().unwrap();
         println!("body: {}", std::str::from_utf8(&bytes)?);
         let vec_bytes = bytes.to_vec();
         app.set_tor_response_body(vec_bytes);
+        if now.elapsed().as_secs() > 10 {
+            break;
+        }
     }
 
     Ok(())

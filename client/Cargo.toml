@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.79"
-arti-client = "0.14.0"
+arti-client = { version = "0.14.0", features = ["onion-service-client"] }
 crossterm = { version = "0.27.0", features = ["event-stream"] }
 futures = "0.3.30"
 http-body-util = "0.1.0"
