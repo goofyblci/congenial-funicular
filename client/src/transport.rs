@@ -1,14 +1,17 @@
 use anyhow::Result;
+use arti_client::config::circ::{CircMgrConfig, CircuitTiming};
+use futures::AsyncReadExt;
 use http_body_util::{BodyExt, Empty};
 use hyper::body::Bytes;
 use hyper::http::uri::Scheme;
 use hyper::{Request, StatusCode, Uri};
 use hyper_util::rt::TokioIo;
+use ipgeolocate::{Locator, Service};
 use tokio::io::{AsyncRead, AsyncWrite};
-use tokio::time;
+use tokio::time::{self, sleep};
 use tokio_native_tls::native_tls::TlsConnector;
 
-use arti_client::{StreamPrefs, TorClient, TorClientConfig};
+use arti_client::{TorClient, TorClientConfig};
 
 use crate::app::App;
 
@@ -32,6 +35,24 @@ pub async fn make_test_connection(app: &mut App) -> Result<()> {
         _ => 80,
     };
     let stream = client.connect((host, port)).await.unwrap();
+    let circuit = stream.circuit().path_ref();
+    let service = Service::IpApi;
+    for path_entry in circuit.iter() {
+        let path_entry_string = path_entry.to_string();
+        if !path_entry_string.contains('>') {
+            let path_vec: Vec<&str> = path_entry_string.split_whitespace().collect();
+            for path_element in path_vec {
+                if path_element.contains('.') {
+                    let ip_addr_with_port: Vec<&str> = path_element.split(':').collect();
+                    match Locator::get(&ip_addr_with_port[0].replace("[", ""), service).await {
+                        Ok(ip) => println!("{} - {} ({})", ip.ip, ip.city, ip.country),
+                        Err(error) => println!("Error: {}", error),
+                    };
+                }
+            }
+        }
+    }
+    sleep(time::Duration::from_secs(15)).await;
     if https {
         let cx = TlsConnector::builder().build().unwrap();
         let cx = tokio_native_tls::TlsConnector::from(cx);
