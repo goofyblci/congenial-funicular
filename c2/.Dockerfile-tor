@@ -4,5 +4,6 @@ RUN apt-get update
 RUN apt-get install -y tor supervisor 
 
 COPY supervisord.conf /etc/supervisor/supervisord.conf
+COPY ./torrc /etc/tor/torrc
 
 ENTRYPOINT ["supervisord", "-c", "/etc/supervisor/supervisord.conf"]

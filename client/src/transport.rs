@@ -8,13 +8,13 @@ use tokio::io::{AsyncRead, AsyncWrite};
 use tokio::time;
 use tokio_native_tls::native_tls::TlsConnector;
 
-use arti_client::{TorClient, TorClientConfig};
+use arti_client::{StreamPrefs, TorClient, TorClientConfig};
 
 use crate::app::App;
 
 pub async fn make_test_connection(app: &mut App) -> Result<()> {
     let url: Uri =
-        "http://2jwcnprqbugvyi6ok2h2h7u26qc6j5wxm7feh3znlh2qu3h6hjld4kyd.onion".parse()?;
+        "http://ucd2in7e4aiakufoafjj5uwy3in3neqdspknwrnyfhi7n73ow3b5zvid.onion".parse()?;
     let host = url.host().unwrap();
     let https = url.scheme() == Some(&Scheme::HTTPS);
     let mut config = TorClientConfig::builder();
@@ -23,6 +23,7 @@ pub async fn make_test_connection(app: &mut App) -> Result<()> {
         .allow_onion_addrs(true)
         .build()
         .unwrap();
+    // let stream_prefs = StreamPrefs::new();
     let final_config = config.build().unwrap();
     let client = TorClient::create_bootstrapped(final_config).await?;
     let port = match url.port_u16() {

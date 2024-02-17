@@ -9,6 +9,12 @@ RUN cargo build --release
 
 FROM debian:bookworm-slim AS c2
 
-COPY --from=build /c2/target/release/c2 /
+RUN mkdir c2_server
 
-CMD ["/c2"]
+WORKDIR /c2_server
+
+COPY --from=build /c2/target/release/c2 /c2_server/
+COPY --from=build /c2/Rocket.toml /c2_server/
+
+
+CMD ["/c2_server/c2"]
