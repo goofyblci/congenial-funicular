@@ -23,11 +23,14 @@ pub fn render(app: &mut App, frame: &mut Frame) {
     let circuit_block = Block::default().borders(Borders::ALL).title("Circuit info");
 
     let mut lines: Vec<Line> = Vec::new();
-    for circuit_info in app.tor_circuits_info.iter() {
-        lines.push(Line::from(format!(
-            "Country: {:?}\n City: {:?}",
-            circuit_info.country, circuit_info.city
-        )))
+    let try_lock_res = app.tor_circuits_info.try_lock();
+    if try_lock_res.is_ok() {
+        for circuit_info in try_lock_res.unwrap().iter() {
+            lines.push(Line::from(format!(
+                "Country: {:?}\n City: {:?}",
+                circuit_info.country, circuit_info.city
+            )))
+        }
     }
 
     frame.render_widget(Paragraph::new(lines).block(circuit_block), circuit_info);

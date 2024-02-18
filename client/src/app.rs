@@ -1,12 +1,13 @@
-use std::error;
+use std::{error, sync::Arc};
 
 use hyper::StatusCode;
+use tokio::sync::Mutex;
 
 /// Application result type.
 pub type AppResult<T> = std::result::Result<T, Box<dyn error::Error>>;
 
 /// Application.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct App {
     /// Is the application running?
     pub running: bool,
@@ -16,32 +17,31 @@ pub struct App {
     pub tor_response_body: Vec<u8>,
     /// tor response status
     pub tor_response_status: StatusCode,
-    pub tor_circuits_info: Vec<CircuitInfo>,
+    pub tor_circuits_info: Arc<Mutex<Vec<CircuitInfo>>>,
 }
 
 #[derive(Debug)]
+pub enum ChannelTypes {
+    CircuitInformation(Vec<CircuitInfo>),
+}
+
+#[derive(Debug, Clone)]
 pub struct CircuitInfo {
     pub ip_address: String,
     pub city: String,
     pub country: String,
 }
 
-impl Default for App {
-    fn default() -> Self {
+impl App {
+    /// Constructs a new instance of [`App`].
+    pub fn new() -> Self {
         Self {
             running: true,
             counter: 0,
             tor_response_body: Vec::new(),
             tor_response_status: StatusCode::IM_USED,
-            tor_circuits_info: Vec::new(),
+            tor_circuits_info: Arc::new(Mutex::new(Vec::new())),
         }
-    }
-}
-
-impl App {
-    /// Constructs a new instance of [`App`].
-    pub fn new() -> Self {
-        Self::default()
     }
 
     /// Handles the tick event of the terminal.
@@ -73,6 +73,9 @@ impl App {
     }
 
     pub fn set_tor_circuit_info(&mut self, circuit_infos: Vec<CircuitInfo>) {
-        self.tor_circuits_info = circuit_infos;
+        let try_lock_res = self.tor_circuits_info.try_lock();
+        if try_lock_res.is_ok() {
+            *try_lock_res.unwrap() = circuit_infos;
+        }
     }
 }
