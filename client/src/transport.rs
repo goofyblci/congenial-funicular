@@ -1,6 +1,4 @@
 use anyhow::Result;
-use arti_client::config::circ::{CircMgrConfig, CircuitTiming};
-use futures::AsyncReadExt;
 use http_body_util::{BodyExt, Empty};
 use hyper::body::Bytes;
 use hyper::http::uri::Scheme;
@@ -13,7 +11,7 @@ use tokio_native_tls::native_tls::TlsConnector;
 
 use arti_client::{TorClient, TorClientConfig};
 
-use crate::app::App;
+use crate::app::{App, CircuitInfo};
 
 pub async fn make_test_connection(app: &mut App) -> Result<()> {
     let url: Uri =
@@ -37,6 +35,7 @@ pub async fn make_test_connection(app: &mut App) -> Result<()> {
     let stream = client.connect((host, port)).await.unwrap();
     let circuit = stream.circuit().path_ref();
     let service = Service::IpApi;
+    let mut circuit_infos: Vec<CircuitInfo> = Vec::new();
     for path_entry in circuit.iter() {
         let path_entry_string = path_entry.to_string();
         if !path_entry_string.contains('>') {
@@ -44,15 +43,27 @@ pub async fn make_test_connection(app: &mut App) -> Result<()> {
             for path_element in path_vec {
                 if path_element.contains('.') {
                     let ip_addr_with_port: Vec<&str> = path_element.split(':').collect();
-                    match Locator::get(&ip_addr_with_port[0].replace("[", ""), service).await {
-                        Ok(ip) => println!("{} - {} ({})", ip.ip, ip.city, ip.country),
-                        Err(error) => println!("Error: {}", error),
+                    match Locator::get(&ip_addr_with_port[0].replace('[', ""), service).await {
+                        Ok(ip) => {
+                            circuit_infos.push(CircuitInfo {
+                                ip_address: ip.ip,
+                                city: ip.city,
+                                country: ip.country,
+                            });
+                        }
+                        Err(_error) => {
+                            circuit_infos.push(CircuitInfo {
+                                ip_address: "x.x.x.x".to_owned(),
+                                city: "UNKNOWN".to_owned(),
+                                country: "UNKNOWN".to_owned(),
+                            });
+                        }
                     };
                 }
             }
         }
     }
-    sleep(time::Duration::from_secs(15)).await;
+    app.set_tor_circuit_info(circuit_infos);
     if https {
         let cx = TlsConnector::builder().build().unwrap();
         let cx = tokio_native_tls::TlsConnector::from(cx);

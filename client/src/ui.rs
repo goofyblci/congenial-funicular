@@ -1,7 +1,9 @@
 use ratatui::{
     layout::Alignment,
+    prelude::{Constraint, Layout},
     style::{Color, Style},
-    widgets::{Block, BorderType, Paragraph},
+    text::{Line, Text},
+    widgets::{Block, BorderType, Borders, Paragraph},
     Frame,
 };
 
@@ -13,23 +15,20 @@ pub fn render(app: &mut App, frame: &mut Frame) {
     // See the following resources:
     // - https://docs.rs/ratatui/latest/ratatui/widgets/index.html
     // - https://github.com/ratatui-org/ratatui/tree/master/examples
-    frame.render_widget(
-        Paragraph::new(format!(
-            "This is a tui template.\n\
-                Press `Esc`, `Ctrl-C` or `q` to stop running.\n\
-                Press left and right to increment and decrement the counter respectively.\n\
-                Tor response body bytes: {:?} \n\
-                Tor response status code: {:?}",
-            app.tor_response_body, app.tor_response_status
-        ))
-        .block(
-            Block::bordered()
-                .title("Template")
-                .title_alignment(Alignment::Center)
-                .border_type(BorderType::Rounded),
-        )
-        .style(Style::default().fg(Color::Cyan).bg(Color::Black))
-        .centered(),
-        frame.size(),
-    )
+    let horizontal = Layout::horizontal([Constraint::Percentage(50), Constraint::Percentage(50)]);
+    let vertical = Layout::vertical([Constraint::Percentage(20), Constraint::Percentage(50)]);
+    let [command_container, information_container] = horizontal.areas(frame.size());
+    let [circuit_info, boxes] = vertical.areas(information_container);
+
+    let circuit_block = Block::default().borders(Borders::ALL).title("Circuit info");
+
+    let mut lines: Vec<Line> = Vec::new();
+    for circuit_info in app.tor_circuits_info.iter() {
+        lines.push(Line::from(format!(
+            "Country: {:?}\n City: {:?}",
+            circuit_info.country, circuit_info.city
+        )))
+    }
+
+    frame.render_widget(Paragraph::new(lines).block(circuit_block), circuit_info);
 }

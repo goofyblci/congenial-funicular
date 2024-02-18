@@ -16,6 +16,14 @@ pub struct App {
     pub tor_response_body: Vec<u8>,
     /// tor response status
     pub tor_response_status: StatusCode,
+    pub tor_circuits_info: Vec<CircuitInfo>,
+}
+
+#[derive(Debug)]
+pub struct CircuitInfo {
+    pub ip_address: String,
+    pub city: String,
+    pub country: String,
 }
 
 impl Default for App {
@@ -25,6 +33,7 @@ impl Default for App {
             counter: 0,
             tor_response_body: Vec::new(),
             tor_response_status: StatusCode::IM_USED,
+            tor_circuits_info: Vec::new(),
         }
     }
 }
@@ -61,5 +70,9 @@ impl App {
 
     pub fn set_tor_status_code(&mut self, status_code: StatusCode) {
         self.tor_response_status = status_code;
+    }
+
+    pub fn set_tor_circuit_info(&mut self, circuit_infos: Vec<CircuitInfo>) {
+        self.tor_circuits_info = circuit_infos;
     }
 }

@@ -18,9 +18,7 @@ async fn main() -> AppResult<()> {
     let events = EventHandler::new(250);
     let mut tui = Tui::new(terminal, events);
     tui.init()?;
-    println!("Begin");
-    let response = transport::make_test_connection(&mut app).await;
-    println!("Response from tor: {:#?}", response);
+    transport::make_test_connection(&mut app).await;
 
     // Start the main loop.
     while app.running {
