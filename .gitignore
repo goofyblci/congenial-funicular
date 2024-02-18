@@ -1,2 +1,8 @@
+.DS_Store
+
+client/.DS_Store
+c2/.DS_Store
+agent/.DS_Store
+
 c2/target
 agent/target

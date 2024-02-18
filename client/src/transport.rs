@@ -67,6 +67,12 @@ impl OnionConnection {
                         };
                     }
                 }
+            } else {
+                circuit_infos.push(CircuitInfo {
+                    ip_address: "x.x.x.x".to_owned(),
+                    city: "UNKNOWN".to_owned(),
+                    country: "UNKNOWN".to_owned(),
+                });
             }
         }
         self.sender

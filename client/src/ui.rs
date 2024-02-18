@@ -1,7 +1,8 @@
+use crossterm::style::Stylize;
 use ratatui::{
     layout::Alignment,
     prelude::{Constraint, Layout},
-    style::{Color, Style},
+    style::{Color, Style, Styled},
     text::{Line, Text},
     widgets::{Block, BorderType, Borders, Paragraph},
     Frame,
@@ -26,12 +27,21 @@ pub fn render(app: &mut App, frame: &mut Frame) {
     let try_lock_res = app.tor_circuits_info.try_lock();
     if try_lock_res.is_ok() {
         for circuit_info in try_lock_res.unwrap().iter() {
-            lines.push(Line::from(format!(
-                "Country: {:?}\n City: {:?}",
-                circuit_info.country, circuit_info.city
-            )))
+            lines.push(
+                Line::from(format!(
+                    "Country: {:?}\n City: {:?}",
+                    circuit_info.country, circuit_info.city
+                ))
+                .style(Style::default().fg(Color::Red)),
+            )
         }
     }
 
-    frame.render_widget(Paragraph::new(lines).block(circuit_block), circuit_info);
+    frame.render_widget(
+        Paragraph::new(lines)
+            .style(Style::default().fg(Color::Red))
+            .block(circuit_block)
+            .style(Style::default().fg(Color::Red)),
+        circuit_info,
+    );
 }
