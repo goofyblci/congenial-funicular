@@ -18,7 +18,11 @@ async fn main() -> AppResult<()> {
     let events = EventHandler::new(250);
     let mut tui = Tui::new(terminal, events);
     tui.init()?;
-    transport::make_test_connection(&mut app).await;
+    let onion_connection = transport::OnionConnection::new(
+        "http://ucd2in7e4aiakufoafjj5uwy3in3neqdspknwrnyfhi7n73ow3b5zvid.onion",
+    )
+    .await;
+    onion_connection.make_request().await?;
 
     // Start the main loop.
     while app.running {
