@@ -3,6 +3,7 @@ use client::event::{Event, EventHandler};
 use client::handler::handle_key_events;
 use client::transport;
 use client::tui::Tui;
+use dotenv::dotenv;
 use ratatui::backend::CrosstermBackend;
 use ratatui::Terminal;
 use std::io;
@@ -11,6 +12,7 @@ use tokio::sync::Mutex;
 
 #[tokio::main]
 async fn main() -> AppResult<()> {
+    dotenv().ok();
     // Create channel
     let (sender, mut receiver) = tokio::sync::mpsc::channel::<ChannelTypes>(5);
     // Create an application.
@@ -35,11 +37,8 @@ async fn main() -> AppResult<()> {
         }
     });
     tokio::spawn(async move {
-        let onion_connection = transport::OnionConnection::new(
-            "http://ucd2in7e4aiakufoafjj5uwy3in3neqdspknwrnyfhi7n73ow3b5zvid.onion",
-            sender,
-        )
-        .await;
+        let host = dotenv::var("ONION_ENDPOINT").expect("ONION_ENDPOINT_NOT_SET");
+        let onion_connection = transport::OnionConnection::new(&host, sender).await;
         onion_connection.make_request().await.unwrap();
     });
 

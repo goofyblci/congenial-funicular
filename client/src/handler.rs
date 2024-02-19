@@ -14,6 +14,8 @@ pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
                 app.quit();
             }
         }
+        // make api call on `k` key press
+        KeyCode::Char('k') => {}
         // Counter handlers
         KeyCode::Right => {
             app.increment_counter();
