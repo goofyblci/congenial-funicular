@@ -131,4 +131,11 @@ impl OnionConnection {
 
         Ok(())
     }
+
+    pub async fn make_websocket_connection(&self) -> Result<()> {
+        tokio_tungstenite::connect_async(&self.host)
+            .await
+            .expect("CONNECT_TO_WS");
+        Ok(())
+    }
 }

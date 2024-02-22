@@ -40,6 +40,7 @@ async fn main() -> AppResult<()> {
         let host = dotenv::var("ONION_ENDPOINT").expect("ONION_ENDPOINT_NOT_SET");
         let onion_connection = transport::OnionConnection::new(&host, sender).await;
         onion_connection.make_request().await.unwrap();
+        onion_connection.make_websocket_connection().await.unwrap();
     });
 
     // Start the main loop.
